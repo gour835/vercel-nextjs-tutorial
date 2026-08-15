@@ -89,8 +89,11 @@ const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
+  date: string
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  const dateOrder = String(date ? date == 'acc'? 'ASC' : 'DESC': 'DESC');
+  console.log(dateOrder);
 
   try {
     const invoices = await sql<InvoicesTable[]>`
@@ -110,7 +113,7 @@ export async function fetchFilteredInvoices(
         invoices.amount::text ILIKE ${`%${query}%`} OR
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`}
-      ORDER BY invoices.date DESC
+      ORDER BY invoices.date ${sql.unsafe(dateOrder)}
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
