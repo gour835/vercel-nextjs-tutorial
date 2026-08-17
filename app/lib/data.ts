@@ -89,7 +89,8 @@ const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
-  date: string
+  date: string,
+  status: string
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   const dateOrder = String(date ? date == 'acc'? 'ASC' : 'DESC': 'DESC');
@@ -108,16 +109,34 @@ export async function fetchFilteredInvoices(
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
       WHERE
-        customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`} OR
-        invoices.amount::text ILIKE ${`%${query}%`} OR
-        invoices.date::text ILIKE ${`%${query}%`} OR
-        invoices.status ILIKE ${`%${query}%`}
+        (${status} = '' OR invoices.status = ${status})
+        AND (
+          customers.name ILIKE ${`%${query}%`} OR
+          customers.email ILIKE ${`%${query}%`} OR
+          invoices.amount::text ILIKE ${`%${query}%`} OR
+          invoices.date::text ILIKE ${`%${query}%`} OR
+          invoices.status ILIKE ${`%${query}%`}
+        )
       ORDER BY invoices.date ${sql.unsafe(dateOrder)}
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
     return invoices;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch invoices.');
+  }
+}
+
+export async function fetchInvoiceStatus() {
+  
+  try {
+    const status = await sql<InvoicesTable[]>`
+      SELECT DISTINCT status
+      FROM invoices
+    `;
+
+    return status.map((item) => item.status);
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoices.');

@@ -2,19 +2,23 @@ import Image from 'next/image';
 import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredInvoices } from '@/app/lib/data';
+import { fetchFilteredInvoices, fetchInvoiceStatus } from '@/app/lib/data';
 import InvoiveTableHead from './table-head';
 
 export default async function InvoicesTable({
   query,
   currentPage,
-  date
+  date,
+  status
 }: {
   query: string;
   currentPage: number;
   date: string;
+  status: string
 }) {
-  const invoices = await fetchFilteredInvoices(query, currentPage, date);
+  const invoices = await fetchFilteredInvoices(query, currentPage, date, status);
+  const statusDist = await fetchInvoiceStatus();
+  console.log(status)
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
@@ -58,7 +62,7 @@ export default async function InvoicesTable({
           </div>
           <table className="hidden min-w-full text-gray-900 md:table">
             {/* table head */}
-            <InvoiveTableHead date={date} />
+            <InvoiveTableHead date={date} status={statusDist} />
             <tbody className="bg-white">
               {invoices?.map((invoice) => (
                 <tr

@@ -2,8 +2,9 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AiFillCaretDown, AiFillCaretUp } from "react-icons/ai";
+import { StatusPopoverForm } from "./status-popover-form";
 
-export default function InvoiveTableHead({date}: {date: string}){
+export default function InvoiveTableHead({date, status}: {date: string, status: Array<string>}){
      const searchParams = useSearchParams();
   const pathName = usePathname();
   const { replace } = useRouter();
@@ -16,6 +17,14 @@ export default function InvoiveTableHead({date}: {date: string}){
     } else{
       params.set('date', 'acc');
     }
+    console.log('clicked');
+    replace(`${pathName}?${params.toString()}`);
+  }
+
+  async function HandleSortStatus(item: string) {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', '1');
+    params.set('status', item);
     console.log('clicked');
     replace(`${pathName}?${params.toString()}`);
   }
@@ -41,10 +50,11 @@ export default function InvoiveTableHead({date}: {date: string}){
                         {DateIcon}
                       </span>
                     </th>
+                    {/* //status */}
                     <th scope="col"
                     className="px-3 py-5 font-medium"
                     >
-                      Status
+                      <StatusPopoverForm status={status} HandleSortStatus={HandleSortStatus} />
                     </th>
                     <th scope="col" className="relative py-3 pl-6 pr-3">
                       <span className="sr-only">Edit</span>
